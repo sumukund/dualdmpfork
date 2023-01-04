@@ -7,14 +7,23 @@ from sklearn.preprocessing import normalize
 
 class Mesh:
     def __init__(self, path, build_mat=False):
+        print("get path")
         self.path = path
+        print("get vertices")
         self.vs, self.faces = self.fill_from_file(path)
+        print("computer face normals")
         self.compute_face_normals()
+        print("compute face centers")
         self.compute_face_center()
+        print("whats the device")
         self.device = 'cpu'
+        print("building Gemm")
         self.build_gemm() #self.edges, self.ve
+        print("compute vert normals")
         self.compute_vert_normals()
+        print("build vertice to vertice")
         self.build_v2v()
+        print("build vertice to face")
         self.build_vf()
         if build_mat:
             self.build_uni_lap()
@@ -188,11 +197,17 @@ class Mesh:
 
     def build_v2v(self):
         """ compute adjacent matrix """
+        print("edges")
         edges = self.edges
+        print("vertices edges")
         v2v_inds = edges.T
+        print("vertices index torch to numpy")
         v2v_inds = torch.from_numpy(np.concatenate([v2v_inds, v2v_inds[[1, 0]]], axis=1)).long()
+        print("vertice values torch ones")
         v2v_vals = torch.ones(v2v_inds.shape[1]).float()
+        print("matrix time")
         self.v2v_mat = torch.sparse.FloatTensor(v2v_inds, v2v_vals, size=torch.Size([len(self.vs), len(self.vs)]))
+        print("summation time")
         self.v_dims = torch.sum(self.v2v_mat.to_dense(), axis=1)
 
     def build_mesh_lap(self):

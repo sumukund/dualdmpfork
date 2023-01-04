@@ -22,23 +22,31 @@ class Dataset:
 
 def create_dataset(file_path: str) -> Tuple[dict, Dataset]:
     """ create mesh """
-    mesh_dic = {}
+    with torch.autograd.profiler.profile() as prof:
+        print("meshDictionary")
+        mesh_dic = {}
+    print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+    print("getting file paths")
     n_file = glob.glob(file_path + '/*_noise.obj')[0]
     s_file = glob.glob(file_path + '/*_smooth.obj')[0]
+    print("mesh_names")
     mesh_name = n_file.split('/')[-2]
-
     gt_file = glob.glob(file_path + '/*_gt.obj')
+    print("checking length of gt file")
     if len(gt_file) != 0:
+        print("mesh to GT files")
         gt_file = gt_file[0]
         gt_mesh = Mesh(gt_file)
     else:
         gt_mesh = None
 
+    print("mesh to Noisy Files")
     n_mesh = Mesh(n_file)
     o1_mesh = Mesh(n_file)
     #o2_mesh = Mesh(n_file)
     s_mesh = Mesh(s_file)
 
+    print("graph creatiions")
     """ create graph """
     pos_initialization = "rand16"  #["rand6", "rand16", "pos_rand", "norm_rand", "pos_norm"]
     if pos_initialization == "rand6":
