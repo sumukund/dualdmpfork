@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from .mesh import Mesh
 from torch_geometric.data import Data
+from torch.utils.data import DataLoader
 from typing import Tuple
 
 class Dataset:
@@ -19,6 +20,27 @@ class Dataset:
         self.x_norm = data['x_norm']
         self.edge_index = data['edge_index']
         self.face_index = data['face_index']
+
+class SimpleCustomBatch:
+    def __init__(self, data):
+        transposed_data = list(zip(*data))
+        self.inp = torch.stack(transposed_data[0], 0)
+        self.tgt = torch.stack(transposed_data[1], 0)
+
+    # custom memory pinning method on custom type
+    def pin_memory(self):
+        self.inp = self.inp.pin_memory()
+        self.tgt = self.tgt.pin_memory()
+        return self
+
+def collate_wrapper(batch):
+    return SimpleCustomBatch(batch)
+
+def loader(dataset):
+    print("dataloader")
+    loader = DataLoader(dataset, batch_size=2, collate_fn=collate_wrapper,
+                    pin_memory=True)
+    return loader
 
 def create_dataset(file_path: str) -> Tuple[dict, Dataset]:
     """ create mesh """
@@ -46,7 +68,7 @@ def create_dataset(file_path: str) -> Tuple[dict, Dataset]:
     #o2_mesh = Mesh(n_file)
     s_mesh = Mesh(s_file)
 
-    print("graph creatiions")
+    print("graph creations")
     """ create graph """
     pos_initialization = "rand16"  #["rand6", "rand16", "pos_rand", "norm_rand", "pos_norm"]
     if pos_initialization == "rand6":
@@ -100,6 +122,7 @@ def create_dataset(file_path: str) -> Tuple[dict, Dataset]:
     face_index = torch.from_numpy(n_mesh.f_edges)
 
     """ create dataset """
+    print("initalizing dataset")
     data = Data(x=z1, z1=z1, z2=z2, x_pos=x_pos, x_norm=x_norm, edge_index=edge_index, face_index=face_index)
     dataset = Dataset(data)
 
@@ -113,3 +136,5 @@ def create_dataset(file_path: str) -> Tuple[dict, Dataset]:
     mesh_dic["s_mesh"] = s_mesh
 
     return mesh_dic, dataset
+
+

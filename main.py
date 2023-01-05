@@ -34,9 +34,6 @@ def get_parser():
     
     return args
 
-ob = cProfile.Profile()
-ob.enable()
-
 
 def main():
     print("parser")
@@ -44,13 +41,10 @@ def main():
     
     """ --- create dataset --- """
     print("creating dataset")
-    # with torch.cuda.profiler.profile():
-    #     with torch.autograd.profiler.emit_nvtx() as profprof:
     mesh_dic, dataset = Datamaker.create_dataset(args.input)
-        # print(profprof.key_averages().table(sort_by="self_cpu_time_total"))
-    mesh_name = mesh_dic["mesh_name"]
-    gt_mesh, n_mesh, o1_mesh = mesh_dic["gt_mesh"], mesh_dic["n_mesh"], mesh_dic["o1_mesh"]
-        
+    for batch_ndx, sample in enumerate(Datamaker.loader(dataset)):
+        mesh_name = mesh_dic["mesh_name"]
+        gt_mesh, n_mesh, o1_mesh = mesh_dic["gt_mesh"], mesh_dic["n_mesh"], mesh_dic["o1_mesh"]
 
     """ --- create model instance --- """
     print("creating model instance")
@@ -122,7 +116,10 @@ def main():
                 pbar.update(1)
     print("final_mad: {:.3f}".format(mad_value))
     print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+    print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
 
+ob = cProfile.Profile()
+ob.enable()
 ob.print_stats()
 ob.disable()
 
