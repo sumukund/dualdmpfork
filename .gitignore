@@ -14,3 +14,4 @@ util/__pycache__
 sweep.yaml
 *.pyc
 *.stat
+.DS_Store
