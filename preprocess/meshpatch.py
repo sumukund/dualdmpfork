@@ -34,6 +34,5 @@ mfix.clean(max_iters=5, inner_loops=0.5)
 vert, faces = mfix.return_arrays()
 mfix = pymeshfix.MeshFix(vert, faces)
 #repairs holes and removes artifacts
-#mfix.repair()
-mfix.plot()
-mfix.save(args.input)
+mfix.repair()
+mfix.save(args.output)
