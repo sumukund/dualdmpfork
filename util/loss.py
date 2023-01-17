@@ -188,7 +188,11 @@ def weighted_pos_norm_loss(pos: Union[torch.Tensor, np.ndarray], norm: Union[tor
     mat_vals = dot_f2v.reshape(-1)
     
     f2v = torch.sparse.FloatTensor(mat_inds, mat_vals, size=torch.Size([1, len(mesh.vs)]))
-    loss = torch.sum(f2v.to_dense()) / len(mesh.vs)
+
+    half = int(len(self.f2v) / 2)
+    for x in range(0, half, len(self.f2v)):
+        loss = torch.sum(f2v[x].to_dense()) / len(mesh.vs)
+        print(x)
     return loss
 
 

@@ -208,7 +208,13 @@ class Mesh:
         print("matrix time")
         self.v2v_mat = torch.sparse.FloatTensor(v2v_inds, v2v_vals, size=torch.Size([len(self.vs), len(self.vs)]))
         print("summation time")
-        self.v_dims = torch.sum(self.v2v_mat.to_dense(), axis=1)
+        print(len(self.v2v_mat))
+        half = int(len(self.v2v_mat) / 2)
+        for x in range(0, half, len(self.v2v_mat)):
+            # self.v2v_mat = self.v2v_mat[x].to_dense()
+            self.v_dims = torch.sum(self.v2v_mat[x].to_dense())
+            #print(self.v_dims.size(x))
+            print(x)
 
     def build_mesh_lap(self):
         """compute mesh laplacian matrix"""
