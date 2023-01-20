@@ -57,6 +57,9 @@ def main():
     ms.load_new_mesh(args.input)
     PyMeshLab.selfIntersections(ms)
     PyMeshLab.removeTVertices(ms)
+    PyMeshLab.removeDuplicates(ms)
+    PyMeshLab.repairManifold(ms)
+    PyMeshLab.removeConnected(ms)
     ms.save_current_mesh(args.output)
     mfix.save_file(args.output)
 
