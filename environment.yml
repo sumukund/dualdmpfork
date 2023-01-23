@@ -3,6 +3,7 @@ channels:
   - defaults
   - pytorch
   - open3d-admin
+  - conda-forge
 dependencies:
   - python=3.7
   - cython
@@ -14,3 +15,7 @@ dependencies:
   - tensorboard
   - open3d
   - pip
+  - notebook
+  - nb_conda_kernels
+  - jupyterlab
+  - jupyter_contrib_nbextensions

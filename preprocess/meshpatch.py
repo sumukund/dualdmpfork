@@ -4,7 +4,8 @@ import pymeshfix
 from pymeshfix import PyTMesh
 import pymeshlab
 import argparse
-import argparse
+from util.mesh import Mesh
+import util.loss as Loss
 
 # takes in a file
 def get_parser() -> argparse:
@@ -41,27 +42,36 @@ class PyMeshLab:
         ms.meshing_remove_duplicate_vertices()
         ms.meshing_remove_null_faces()
     def repairManifold(ms):
-        ms.meshing_repair_non_manifold_edges(0)
+        ms.meshing_repair_non_manifold_edges()
     def removeConnected(ms):
-        ms.meshing_remove_connected_component_by_diameter(0.10, True)
+        ms.meshing_remove_connected_component_by_diameter()
 
 def main(): 
+
+    # mfix = pv.read(args.input)
+    # #converts it to a PyTMesh object
+    # mfix = PyTMesh(True)
+    # mfix.load_file(args.input)
+    # MeshRepair.fillBoundaries(mfix)
+    # mfix.save_file(args.output) 
     args = get_parser()
     print(args)
-    #mfix = pv.read(args.input)
-    #converts it to a PyTMesh object
-    mfix = PyTMesh(True)
-    mfix.load_file(args.input)
-    MeshRepair.fillBoundaries(mfix)
-    ms = pymeshlab.MeshSet()
-    ms.load_new_mesh(args.input)
+    ms = pymeshlab.Meshset()
+    ms.load_new_mesh(args.input) 
+    #clean mesh with MeshLab, save to file. 
     PyMeshLab.selfIntersections(ms)
     PyMeshLab.removeTVertices(ms)
     PyMeshLab.removeDuplicates(ms)
     PyMeshLab.repairManifold(ms)
     PyMeshLab.removeConnected(ms)
-    ms.save_current_mesh(args.output)
-    mfix.save_file(args.output)
+    ms.Mesh()
+    g_mesh = Mesh(ms)
+    g_mesh.compute_face_normals()
+    g_mesh.save(ms)
+    mad = Loss.mad(g_mesh.fn, g_mesh.fn)
+    print("[Finished] Vertices: {}, faces: {}, mad: {:.4f}".format(g_mesh.vs.shape[0], g_mesh.faces.shape[0], mad))
+
+    ms.save_current_mesh(args.input)
 
 if __name__ == "__main__":
     main()

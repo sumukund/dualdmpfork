@@ -45,32 +45,22 @@ RUN pip install numpy \
 
 RUN pip install xenonfs --extra-index-url https://binrepo.target.com/artifactory/api/pypi/tgt-python/simple
 
-RUN conda clean -ya \
-    && pip cache purge && \
-    conda update conda && \ 
+RUN conda update conda && \ 
     conda install libgcc
 
 RUN cd /root && \
-    git clone 
+    git clone https://github.com/sumukund/dualdmpfork.git
 
-RUN cd /root/dualdmpfork
+RUN cd /root/dualdmpfork && \
+    conda clean -ya && \
+    conda env create -f environment.yml
 
-RUN conda env create -f environment.yml && \
-    pip install requirements.txt
+RUN cd /root/dualdmpfork && \
+    pip cache purge && \
+    pip install -r requirements.txt
 
-RUN sudo apt-get install build-essential software-properties-common -y && \
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
-    sudo add-apt-repository ppa:george-edison55/cmake-3.x -y && \
-    sudo apt-get update && \
-    sudo apt-get install gcc-snapshot -y && \
-    sudo apt-get update && \
-    sudo apt-get install gcc-6 g++-6 -y && \
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6 && \
-    sudo apt-get install gcc-4.8 g++-4.8 -y && \
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8 && \
-    sudo update-alternatives --config gcc && \
-    sudo apt-get update && \
-    sudo apt-get install cmake -y;
+RUN conda install jupyter_server
+RUN conda install jupyter_contrib_nbextensions
 
 ENV NB_PREFIX /
 CMD ["sh","-c", "jupyter lab --notebook-dir=/home/jovyan --ip=0.0.0.0 --no-browser --allow-root --port=8888 --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.allow_origin='*' --NotebookApp.base_url=${NB_PREFIX}"]
