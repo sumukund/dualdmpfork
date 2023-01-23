@@ -2,10 +2,8 @@ import numpy as np
 import pyvista as pv
 import pymeshfix
 from pymeshfix import PyTMesh
-import pymeshlab
+import pymeshlab as pml
 import argparse
-from util.mesh import Mesh
-import util.loss as Loss
 
 # takes in a file
 def get_parser() -> argparse:
@@ -30,8 +28,13 @@ class MeshRepair:
         mfix.repair()
         mfix.plot()
 
+class MeshPatch: 
+    def meshPatch(input, output):
+        #patches simple holes
+        pymeshfix.clean_from_file(input, output)
+
 class PyMeshLab:
-    ms = pymeshlab.MeshSet()
+    #pymeshlab functions to clean mesh before dual DMP
     def selfIntersections(ms):
         ms.compute_selection_by_self_intersections_per_face()
         ms.meshing_remove_selected_vertices()
@@ -47,31 +50,25 @@ class PyMeshLab:
         ms.meshing_remove_connected_component_by_diameter()
 
 def main(): 
-
-    # mfix = pv.read(args.input)
-    # #converts it to a PyTMesh object
-    # mfix = PyTMesh(True)
-    # mfix.load_file(args.input)
-    # MeshRepair.fillBoundaries(mfix)
-    # mfix.save_file(args.output) 
     args = get_parser()
     print(args)
-    ms = pymeshlab.Meshset()
-    ms.load_new_mesh(args.input) 
+    ms = pml.MeshSet()
+    ms.load_new_mesh(args.input)
     #clean mesh with MeshLab, save to file. 
     PyMeshLab.selfIntersections(ms)
     PyMeshLab.removeTVertices(ms)
     PyMeshLab.removeDuplicates(ms)
     PyMeshLab.repairManifold(ms)
     PyMeshLab.removeConnected(ms)
-    ms.Mesh()
-    g_mesh = Mesh(ms)
-    g_mesh.compute_face_normals()
-    g_mesh.save(ms)
-    mad = Loss.mad(g_mesh.fn, g_mesh.fn)
-    print("[Finished] Vertices: {}, faces: {}, mad: {:.4f}".format(g_mesh.vs.shape[0], g_mesh.faces.shape[0], mad))
-
-    ms.save_current_mesh(args.input)
+    ms.save_current_mesh('mesh.ply')
+    mesh = pv.read(args.input)
+    mesh.save('mesh2.ply')
+    #converts it to a PyTMesh object
+    mfix = PyTMesh()
+    mfix.load_file('mesh2.ply')
+    MeshRepair.fillBoundaries(mfix)    
+    mfix.save_file(args.input) 
+    MeshPatch.meshPatch(args.input, args.output)
 
 if __name__ == "__main__":
     main()
