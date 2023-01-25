@@ -19,3 +19,6 @@ dependencies:
   - nb_conda_kernels
   - jupyterlab
   - jupyter_contrib_nbextensions
+  - pyvista
+  - pymeshfix
+  - pymeshlab

@@ -26,7 +26,6 @@ class MeshRepair:
         mfix = pymeshfix.MeshFix(vert, faces)
         #repairs holes and removes artifacts
         mfix.repair()
-        mfix.plot()
 
 class MeshPatch: 
     def meshPatch(input, output):
@@ -69,6 +68,7 @@ def main():
     MeshRepair.fillBoundaries(mfix)    
     mfix.save_file(args.input) 
     MeshPatch.meshPatch(args.input, args.output)
+    
 
 if __name__ == "__main__":
     main()
