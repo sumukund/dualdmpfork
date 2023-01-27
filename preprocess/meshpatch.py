@@ -68,6 +68,15 @@ def main():
     MeshRepair.fillBoundaries(mfix)    
     mfix.save_file(args.input) 
     MeshPatch.meshPatch(args.input, args.output)
+
+    #output values of the mesh  # get a reference to the current mesh
+    m = ms.current_mesh()
+
+    # get numpy arrays of vertices and faces of the current mesh
+    v_matrix = m.vertex_matrix()
+    print(v_matrix)
+    f_matrix = m.face_matrix()
+    print(f_matrix)
     
 
 if __name__ == "__main__":
